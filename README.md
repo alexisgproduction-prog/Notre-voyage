@@ -1,23 +1,18 @@
-# Notre Voyage — V1
+# Notre Voyage V2
+Interface PWA sombre pour Alexis × Alix.
 
-Application web progressive (PWA) gratuite, sans serveur.
+Inclus : voyage/dates/budget, vols, logements, planning, dépenses 50/50, documents/liens, mode local et préparation complète de la synchronisation Supabase.
 
-## Fonctionnalités
-- Destination et dates du voyage
-- Compte à rebours
-- Budget global
-- Vols / transports
-- Logements
-- Planning
-- Dépenses à deux et équilibre 50/50
-- Stockage local dans le navigateur
-- Installation possible sur iPhone comme PWA
+## GitHub Pages
+Remplace les fichiers de la V1 dans le dépôt GitHub par ceux de cette V2. Garde `index.html` à la racine.
 
-## Installation pour tester
-1. Héberger le dossier sur un hébergement HTTPS (GitHub Pages, Cloudflare Pages, Netlify, etc.).
-2. Ouvrir l'adresse dans Safari sur l'iPhone.
-3. Partager → Ajouter à l'écran d'accueil.
+## Synchronisation à deux
+1. Créer un projet Supabase.
+2. Authentication > Providers : activer Anonymous Sign-Ins.
+3. SQL Editor : exécuter `supabase.sql`.
+4. Dans l'app : Voyage > Configurer.
+5. Coller Project URL + clé publishable/anon.
+6. Alexis crée le voyage partagé et donne le code à Alix.
+7. Alix colle le code sur son iPhone.
 
-## Important
-La V1 stocke les données uniquement sur l'appareil. Elle n'est donc pas encore synchronisée entre deux téléphones.
-La synchronisation, les comptes à deux et l'ajout de PDF/photos peuvent être ajoutés en V2.
+Ne jamais mettre une `service_role` key dans l'application.
