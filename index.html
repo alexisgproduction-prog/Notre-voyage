@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f5f5f7">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Notre Voyage">
+  <title>Notre Voyage</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <style>
+    :root{--bg:#f5f5f7;--card:#fff;--text:#111;--muted:#777;--line:#e4e4e7;--accent:#007aff;--soft:#eaf3ff}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Arial,sans-serif}
+    button,input,select{font:inherit}button{cursor:pointer}.app{max-width:480px;margin:auto;min-height:100vh;padding:18px 16px 96px}
+    header{padding:6px 2px 18px}.eyebrow{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.04em}.title{font-size:32px;font-weight:750;margin:4px 0}.sub{font-size:14px;color:var(--muted)}
+    .screen{display:none}.screen.active{display:block}.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:17px;margin-bottom:12px}
+    .hero{background:var(--soft)}.hero .days{font-size:30px;font-weight:750;margin:3px 0}.row{display:flex;justify-content:space-between;gap:12px;align-items:center}.small{font-size:13px;color:var(--muted)}.big{font-size:26px;font-weight:750}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.action{border:1px solid var(--line);background:var(--card);border-radius:18px;padding:15px;text-align:left;min-height:105px}
+    .ico{width:40px;height:40px;border-radius:13px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:20px}.action strong{display:block;margin-top:8px}.action span{font-size:12px;color:var(--muted)}
+    .nav{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(480px,100%);background:rgba(255,255,255,.94);backdrop-filter:blur(18px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:8px 8px calc(8px + env(safe-area-inset-bottom));z-index:10}
+    .nav button{border:0;background:transparent;color:#777;border-radius:13px;padding:5px 2px;font-size:10px}.nav button.active{color:var(--accent);background:#edf5ff}.nav i{display:block;font-style:normal;font-size:20px;margin-bottom:2px}
+    .btn{border:0;border-radius:13px;padding:11px 15px;background:var(--soft);font-weight:650}.btn.primary{background:var(--accent);color:#fff}.btn.danger{background:#fff0f0;color:#d00}.btn.smallbtn{padding:7px 10px;font-size:12px}
+    form{display:grid;gap:11px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}.field input,.field select{width:100%;border:1px solid var(--line);background:#fafafa;border-radius:12px;padding:11px 12px;outline:none}.field input:focus,.field select:focus{border-color:var(--accent);background:#fff}
+    .item{padding:13px 0;border-bottom:1px solid var(--line)}.item:last-child{border-bottom:0}.empty{text-align:center;padding:25px 5px;color:var(--muted);font-size:14px}
+    .progress{height:9px;border-radius:20px;background:#eee;overflow:hidden;margin-top:9px}.progress span{display:block;height:100%;background:var(--accent);width:0}
+    .hidden{display:none!important}.modalbox{margin-top:12px}.balance{font-size:18px;font-weight:700}
+    @media(max-width:360px){.app{padding-left:12px;padding-right:12px}.title{font-size:28px}.formgrid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="app" id="app">
+  <header>
+    <div class="eyebrow">VOTRE PROCHAIN VOYAGE</div>
+    <div class="title" id="tripTitle">Notre Voyage ✈️</div>
+    <div class="sub" id="tripDates">Configurez votre voyage dans les réglages.</div>
+  </header>
+
+  <main>
+    <section class="screen active" id="screen-home">
+      <div class="card hero">
+        <div class="small">DÉPART DANS</div>
+        <div class="days" id="countdown">—</div>
+        <div class="small" id="destinationLine">Ajoutez votre destination</div>
+      </div>
+      <div class="card">
+        <div class="row">
+          <div><div class="small">BUDGET TOTAL</div><div class="big" id="budgetTotal">0 €</div></div>
+          <div style="text-align:right"><div class="small">DÉPENSÉ</div><strong id="homeSpent">0 €</strong><div class="small">Restant <span id="homeRemaining">0 €</span></div></div>
+        </div>
+        <div class="progress"><span id="budgetProgress"></span></div>
+      </div>
+      <div class="grid">
+        <button class="action" data-go="transport"><div class="ico">✈️</div><strong>Transports</strong><span>Vols & trajets</span></button>
+        <button class="action" data-go="stays"><div class="ico">🏠</div><strong>Logements</strong><span>Réservations</span></button>
+        <button class="action" data-go="planning"><div class="ico">🗓️</div><strong>Planning</strong><span>Itinéraire</span></button>
+        <button class="action" data-go="expenses"><div class="ico">💳</div><strong>Dépenses</strong><span>Budget à deux</span></button>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <div class="small">PROCHAIN ÉVÉNEMENT</div>
+        <div id="nextEvent" class="item">Aucun événement pour le moment.</div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-transport">
+      <div class="card"><div class="row"><div><h2>✈️ Transports</h2><div class="small">Vos vols et trajets</div></div><button class="btn primary" id="showFlightForm">+ Ajouter</button></div></div>
+      <div class="card hidden" id="flightFormCard">
+        <h3>Nouveau vol</h3>
+        <form id="flightForm">
+          <div class="formgrid">
+            <div class="field"><label>Compagnie</label><input id="flightAirline" placeholder="Air France"></div>
+            <div class="field"><label>N° de vol</label><input id="flightNumber" placeholder="AF1234"></div>
+            <div class="field"><label>Départ</label><input id="flightFrom" placeholder="Paris CDG"></div>
+            <div class="field"><label>Arrivée</label><input id="flightTo" placeholder="Sal"></div>
+            <div class="field"><label>Date</label><input id="flightDate" type="date" required></div>
+            <div class="field"><label>Heure</label><input id="flightTime" type="time"></div>
+            <div class="field"><label>Terminal</label><input id="flightTerminal" placeholder="2E"></div>
+            <div class="field"><label>Référence</label><input id="flightRef" placeholder="ABC123"></div>
+            <div class="field"><label>Prix (€)</label><input id="flightPrice" type="number" min="0" step=".01"></div>
+          </div>
+          <button class="btn primary">Enregistrer</button>
+        </form>
+      </div>
+      <div id="flightList"></div>
+    </section>
+
+    <section class="screen" id="screen-stays">
+      <div class="card"><div class="row"><div><h2>🏠 Logements</h2><div class="small">Hôtels, Airbnb et réservations</div></div><button class="btn primary" id="showStayForm">+ Ajouter</button></div></div>
+      <div class="card hidden" id="stayFormCard">
+        <h3>Nouveau logement</h3>
+        <form id="stayForm">
+          <div class="formgrid">
+            <div class="field full"><label>Nom</label><input id="stayName" placeholder="Nom de l'hôtel" required></div>
+            <div class="field"><label>Arrivée</label><input id="stayStart" type="date" required></div>
+            <div class="field"><label>Départ</label><input id="stayEnd" type="date"></div>
+            <div class="field full"><label>Adresse</label><input id="stayAddress" placeholder="Adresse complète"></div>
+            <div class="field"><label>Téléphone</label><input id="stayPhone" placeholder="+238..."></div>
+            <div class="field"><label>Référence</label><input id="stayRef" placeholder="ABC123"></div>
+            <div class="field"><label>Prix (€)</label><input id="stayPrice" type="number" min="0" step=".01"></div>
+          </div>
+          <button class="btn primary">Enregistrer</button>
+        </form>
+      </div>
+      <div id="stayList"></div>
+    </section>
+
+    <section class="screen" id="screen-planning">
+      <div class="card"><h2>🗓️ Planning</h2><div class="small">Votre voyage jour par jour</div></div>
+      <div class="card hidden" id="planFormCard">
+        <h3>Ajouter une activité</h3>
+        <form id="planForm">
+          <div class="formgrid">
+            <div class="field"><label>Date</label><input id="planDate" type="date" required></div>
+            <div class="field"><label>Heure</label><input id="planTime" type="time"></div>
+            <div class="field full"><label>Titre</label><input id="planTitle" placeholder="Randonnée, restaurant…" required></div>
+            <div class="field full"><label>Lieu / note</label><input id="planPlace" placeholder="Lieu, adresse, réservation…"></div>
+          </div>
+          <button class="btn primary">Ajouter</button>
+        </form>
+      </div>
+      <button class="btn primary" id="showPlanForm" style="width:100%;margin-bottom:12px">+ Ajouter une activité</button>
+      <div class="card" id="planList"></div>
+    </section>
+
+    <section class="screen" id="screen-expenses">
+      <div class="card"><div class="row"><div><h2>💳 Dépenses</h2><div class="small">Suivi à deux</div></div><button class="btn primary" id="showExpenseForm">+ Ajouter</button></div></div>
+      <div class="card">
+        <div class="row"><div><div class="small">TOTAL DÉPENSÉ</div><div class="big" id="expenseTotal">0 €</div></div><div style="text-align:right"><div class="small">MOI / ELLE</div><strong id="paidSplit">0 € / 0 €</strong></div></div>
+        <div class="item"><span class="small">Équilibre 50/50</span><div class="balance" id="balanceText">Vous êtes à égalité.</div></div>
+      </div>
+      <div class="card hidden" id="expenseFormCard">
+        <h3>Nouvelle dépense</h3>
+        <form id="expenseForm">
+          <div class="formgrid">
+            <div class="field full"><label>Description</label><input id="expenseName" placeholder="Restaurant, taxi…" required></div>
+            <div class="field"><label>Montant (€)</label><input id="expenseAmount" type="number" min="0" step=".01" required></div>
+            <div class="field"><label>Catégorie</label><select id="expenseCategory"><option>Restaurant</option><option>Transport</option><option>Logement</option><option>Activité</option><option>Shopping</option><option>Autre</option></select></div>
+            <div class="field full"><label>Payé par</label><select id="expenseWho"><option>Moi</option><option>Elle</option></select></div>
+          </div>
+          <button class="btn primary">Ajouter</button>
+        </form>
+      </div>
+      <div id="expenseList"></div>
+    </section>
+
+    <section class="screen" id="screen-docs">
+      <div class="card"><h2>📄 Documents</h2><div class="small">Vos informations importantes</div></div>
+      <div class="card">
+        <div class="item">✈️ <strong>Billets d'avion</strong><div class="small">Les références sont conservées dans Transports.</div></div>
+        <div class="item">🏠 <strong>Réservations logements</strong><div class="small">Adresse, téléphone et référence dans Logements.</div></div>
+        <div class="item">🎟️ <strong>Activités</strong><div class="small">Votre planning centralise les réservations et notes.</div></div>
+      </div>
+      <div class="card"><div class="small">V1</div><strong>Les données sont stockées localement sur cet appareil.</strong><p class="small">La synchronisation à deux et l'ajout de PDF/photos pourront être ajoutés dans une V2.</p></div>
+    </section>
+
+    <section class="screen" id="screen-settings">
+      <div class="card"><h2>⚙️ Voyage</h2><div class="small">Paramètres de votre voyage</div></div>
+      <div class="card">
+        <form id="settingsForm">
+          <div class="field"><label>Destination</label><input id="settingDestination" placeholder="Cap-Vert"></div>
+          <div class="formgrid">
+            <div class="field"><label>Date de départ</label><input id="settingStart" type="date"></div>
+            <div class="field"><label>Date de retour</label><input id="settingEnd" type="date"></div>
+            <div class="field"><label>Budget (€)</label><input id="settingBudget" type="number" min="0" step=".01"></div>
+          </div>
+          <button class="btn primary">Enregistrer</button>
+        </form>
+      </div>
+      <div class="card"><button class="btn danger" id="resetApp">Réinitialiser toutes les données</button></div>
+    </section>
+  </main>
+
+  <nav class="nav">
+    <button class="active" data-screen="home"><i>⌂</i>Accueil</button>
+    <button data-screen="transport"><i>✈️</i>Voyage</button>
+    <button data-screen="planning"><i>🗓️</i>Planning</button>
+    <button data-screen="expenses"><i>€</i>Dépenses</button>
+    <button data-screen="docs"><i>📄</i>Docs</button>
+  </nav>
+</div>
+<script>
+const KEY="notre-voyage-v1";
+const defaultState={destination:"Cap-Vert",start:"2026-11-08",end:"2026-11-21",budget:4000,flights:[],stays:[],plans:[],expenses:[]};
+let state=load();
+function load(){try{return {...defaultState,...JSON.parse(localStorage.getItem(KEY)||"{}")}}catch{return {...defaultState}}}
+function save(){localStorage.setItem(KEY,JSON.stringify(state));render()}
+function $(id){return document.getElementById(id)}
+function eur(n){return new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(Number(n)||0)}
+function fmtDate(s){if(!s)return "";const [y,m,d]=s.split("-");return `${d}/${m}/${y}`}
+function spent(){return state.expenses.reduce((a,e)=>a+e.amount,0)+state.stays.reduce((a,s)=>a+s.price,0)+state.flights.reduce((a,f)=>a+f.price,0)}
+function go(screen){document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));$("screen-"+screen).classList.add("active");document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.screen===screen));window.scrollTo(0,0)}
+document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>go(b.dataset.screen));
+
+function render(){
+  $("tripTitle").textContent=(state.destination||"Notre Voyage")+" ✈️";
+  $("tripDates").textContent=state.start&&state.end?`${fmtDate(state.start)} — ${fmtDate(state.end)} · 2 personnes`:"Configurez votre voyage dans les réglages.";
+  $("destinationLine").textContent=state.destination?`Paris → ${state.destination}`:"Ajoutez votre destination";
+  const now=new Date(), start=new Date((state.start||"9999-12-31")+"T00:00:00");
+  const days=Math.ceil((start-now)/86400000);
+  $("countdown").textContent=days>0?`${days} jours`:days===0?"Aujourd’hui":"Voyage commencé";
+  const total=spent(), remaining=state.budget-total;
+  $("budgetTotal").textContent=eur(state.budget);$("homeSpent").textContent=eur(total);$("homeRemaining").textContent=eur(remaining);
+  $("budgetProgress").style.width=Math.min(100,Math.max(0,state.budget?total/state.budget*100:0))+"%";
+  const events=[];
+  state.flights.forEach(f=>events.push({date:f.date,time:f.time||"",title:`✈️ ${f.from||""} → ${f.to||""}`,sub:`${f.airline||"Vol"} ${f.number||""}`}));
+  state.stays.forEach(s=>events.push({date:s.start,time:"",title:`🏠 ${s.name}`,sub:s.address||"Logement"}));
+  state.plans.forEach(p=>events.push({date:p.date,time:p.time||"",title:`📍 ${p.title}`,sub:p.place||""}));
+  events.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+  $("nextEvent").innerHTML=events.length?`<div class="row"><div><strong>${events[0].title}</strong><div class="small">${fmtDate(events[0].date)}${events[0].time?" · "+events[0].time:""} · ${events[0].sub}</div></div><span>›</span></div>`:"Aucun événement pour le moment.";
+  $("flightList").innerHTML=state.flights.length?state.flights.map((f,i)=>`<div class="card"><div class="row"><div><strong>✈️ ${f.airline||"Vol"} ${f.number||""}</strong><div>${f.from||""} → ${f.to||""}</div><div class="small">${fmtDate(f.date)} ${f.time||""} · Terminal ${f.terminal||"—"} · Réf. ${f.ref||"—"}</div></div><div style="text-align:right"><strong>${eur(f.price)}</strong><br><button class="btn danger smallbtn" data-delete="flight" data-i="${i}">Supprimer</button></div></div></div>`).join(""):`<div class="card empty">Aucun vol ajouté.</div>`;
+  $("stayList").innerHTML=state.stays.length?state.stays.map((s,i)=>`<div class="card"><div class="row"><div><strong>🏠 ${s.name}</strong><div class="small">${fmtDate(s.start)} → ${fmtDate(s.end)}</div><div>${s.address||"Adresse non renseignée"}</div><div class="small">${s.phone||""} · Réf. ${s.ref||"—"}</div></div><div style="text-align:right"><strong>${eur(s.price)}</strong><br><button class="btn danger smallbtn" data-delete="stay" data-i="${i}">Supprimer</button></div></div></div>`).join(""):`<div class="card empty">Aucun logement ajouté.</div>`;
+  const plans=[...state.plans].sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+  $("planList").innerHTML=plans.length?plans.map(p=>`<div class="item"><div class="row"><div><strong>${p.title}</strong><div class="small">${fmtDate(p.date)}${p.time?" · "+p.time:""} · ${p.place||""}</div></div><button class="btn danger smallbtn" data-delete="plan" data-id="${p.id}">×</button></div></div>`).join(""):`<div class="empty">Votre planning apparaîtra ici.</div>`;
+  const expTotal=state.expenses.reduce((a,e)=>a+e.amount,0), me=state.expenses.filter(e=>e.who==="Moi").reduce((a,e)=>a+e.amount,0), elle=expTotal-me;
+  $("expenseTotal").textContent=eur(expTotal);$("paidSplit").textContent=`${eur(me)} / ${eur(elle)}`;
+  const diff=me-elle;
+  $("balanceText").textContent=Math.abs(diff)<.01?"Vous êtes à égalité.":diff>0?`Elle vous doit ${eur(diff/2)} pour revenir à 50/50.`:`Vous lui devez ${eur(Math.abs(diff)/2)} pour revenir à 50/50.`;
+  $("expenseList").innerHTML=state.expenses.length?state.expenses.map((e,i)=>`<div class="card"><div class="row"><div><strong>${e.name}</strong><div class="small">${e.category} · payé par ${e.who}</div></div><div style="text-align:right"><strong>${eur(e.amount)}</strong><br><button class="btn danger smallbtn" data-delete="expense" data-i="${i}">Supprimer</button></div></div></div>`).join(""):`<div class="card empty">Aucune dépense.</div>`;
+  $("settingDestination").value=state.destination||"";$("settingStart").value=state.start||"";$("settingEnd").value=state.end||"";$("settingBudget").value=state.budget||0;
+}
+$("showFlightForm").onclick=()=>$("flightFormCard").classList.toggle("hidden");
+$("showStayForm").onclick=()=>$("stayFormCard").classList.toggle("hidden");
+$("showPlanForm").onclick=()=>$("planFormCard").classList.toggle("hidden");
+$("showExpenseForm").onclick=()=>$("expenseFormCard").classList.toggle("hidden");
+$("flightForm").onsubmit=e=>{e.preventDefault();state.flights.push({airline:$("flightAirline").value,number:$("flightNumber").value,from:$("flightFrom").value,to:$("flightTo").value,date:$("flightDate").value,time:$("flightTime").value,terminal:$("flightTerminal").value,ref:$("flightRef").value,price:+$("flightPrice").value||0});e.target.reset();$("flightFormCard").classList.add("hidden");save()};
+$("stayForm").onsubmit=e=>{e.preventDefault();state.stays.push({name:$("stayName").value,start:$("stayStart").value,end:$("stayEnd").value,address:$("stayAddress").value,phone:$("stayPhone").value,ref:$("stayRef").value,price:+$("stayPrice").value||0});e.target.reset();$("stayFormCard").classList.add("hidden");save()};
+$("planForm").onsubmit=e=>{e.preventDefault();state.plans.push({id:Date.now(),date:$("planDate").value,time:$("planTime").value,title:$("planTitle").value,place:$("planPlace").value});e.target.reset();$("planFormCard").classList.add("hidden");save()};
+$("expenseForm").onsubmit=e=>{e.preventDefault();state.expenses.push({name:$("expenseName").value,amount:+$("expenseAmount").value||0,category:$("expenseCategory").value,who:$("expenseWho").value});e.target.reset();$("expenseFormCard").classList.add("hidden");save()};
+$("settingsForm").onsubmit=e=>{e.preventDefault();state.destination=$("settingDestination").value.trim();state.start=$("settingStart").value;state.end=$("settingEnd").value;state.budget=Math.max(0,+$("settingBudget").value||0);save();go("home")};
+document.addEventListener("click",e=>{const b=e.target.closest("[data-delete]");if(!b)return;const type=b.dataset.delete;if(type==="plan"){state.plans=state.plans.filter(p=>String(p.id)!==b.dataset.id)}else{state[type+"s"].splice(+b.dataset.i,1)}save()});
+$("resetApp").onclick=()=>{if(confirm("Supprimer toutes les données de l'application ?")){localStorage.removeItem(KEY);state={...defaultState,flights:[],stays:[],plans:[],expenses:[]};render();go("home")}};
+if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+render();
+</script>
+</body>
+</html>
